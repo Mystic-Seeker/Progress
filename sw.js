@@ -1,5 +1,5 @@
 // Service Worker for Weekly Progress Tracker with Notifications
-const CACHE_NAME = 'weekly-tracker-v5';
+const CACHE_NAME = 'weekly-tracker-v6';
 const ASSETS = [
   './',
   './index.html',

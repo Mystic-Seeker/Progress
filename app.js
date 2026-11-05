@@ -220,7 +220,14 @@
   let activeFilter = 'all';     // 'all', 'Morning', 'Afternoon', 'Evening'
   let currentQuoteIndex = 0;
   let activeDayIndex = 0;       // 0 = Monday ... 6 = Sunday for the Day View
-  let dismissedReminderId = null;
+  let dismissedReminderIds = new Set();
+  let currentActiveBannerEventId = null;
+  try {
+    const savedDismissed = sessionStorage.getItem('progress_dismissed_reminders');
+    if (savedDismissed) {
+      dismissedReminderIds = new Set(JSON.parse(savedDismissed));
+    }
+  } catch (e) {}
 
   let trackerData = {
     soundEnabled: true,
@@ -426,8 +433,8 @@
           }
         }
 
-        // Track closest upcoming event for in-app banner
-        if (diffMinutes < minTimeDiff && evt.id !== dismissedReminderId) {
+        // Track closest upcoming event for in-app banner (only if not dismissed by user)
+        if (diffMinutes < minTimeDiff && !dismissedReminderIds.has(evt.id)) {
           minTimeDiff = diffMinutes;
           nextUpcomingEvent = { evt, diffMinutes };
         }
@@ -439,9 +446,11 @@
     const bannerTitle = document.getElementById('upcomingReminderTitle');
 
     if (nextUpcomingEvent) {
+      currentActiveBannerEventId = nextUpcomingEvent.evt.id;
       bannerTitle.textContent = `${nextUpcomingEvent.evt.title} at ${formatTimeDisplay(nextUpcomingEvent.evt.time)} (in ${nextUpcomingEvent.diffMinutes} mins)`;
       banner.classList.remove('hidden');
     } else {
+      currentActiveBannerEventId = null;
       banner.classList.add('hidden');
     }
   }
@@ -1607,10 +1616,17 @@
       });
     }
 
-    // Dismiss in-app upcoming reminder banner
+    // Dismiss in-app upcoming reminder banner (permanently dismisses this specific event from popping up again)
     document.getElementById('dismissReminderBannerBtn').addEventListener('click', () => {
+      if (currentActiveBannerEventId) {
+        dismissedReminderIds.add(currentActiveBannerEventId);
+        try {
+          sessionStorage.setItem('progress_dismissed_reminders', JSON.stringify([...dismissedReminderIds]));
+        } catch (e) {}
+      }
       const banner = document.getElementById('upcomingReminderBanner');
       banner.classList.add('hidden');
+      currentActiveBannerEventId = null;
     });
 
     // Open Today Button in 7-day row

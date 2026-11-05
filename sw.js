@@ -1,5 +1,5 @@
-// Service Worker for Weekly Progress Tracker with Notifications
-const CACHE_NAME = 'weekly-tracker-v6';
+// Service Worker for Weekly Progress Tracker with Notifications (v8 - Network-First)
+const CACHE_NAME = 'weekly-tracker-v8';
 const ASSETS = [
   './',
   './index.html',
@@ -35,11 +35,39 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
+// Network-First for HTML & JS so updates appear immediately without cache staleness
 self.addEventListener('fetch', (e) => {
+  const url = e.request.url;
+
+  if (e.request.mode === 'navigate' || url.includes('app.js') || url.endsWith('.html') || url.endsWith('/')) {
+    e.respondWith(
+      fetch(e.request)
+        .then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return networkRes;
+        })
+        .catch(() => caches.match(e.request).then((c) => c || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // Cache-First for images, icons, and manifest
   e.respondWith(
-    caches.match(e.request).then((res) => {
-      return res || fetch(e.request);
-    }).catch(() => caches.match('./index.html'))
+    caches.match(e.request).then((cached) => {
+      return (
+        cached ||
+        fetch(e.request).then((networkRes) => {
+          if (networkRes && networkRes.status === 200) {
+            const clone = networkRes.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return networkRes;
+        })
+      );
+    })
   );
 });
 

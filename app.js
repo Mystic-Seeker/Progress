@@ -223,7 +223,7 @@
   let dismissedReminderIds = new Set();
   let currentActiveBannerEventId = null;
   try {
-    const savedDismissed = sessionStorage.getItem('progress_dismissed_reminders');
+    const savedDismissed = localStorage.getItem('progress_dismissed_reminders');
     if (savedDismissed) {
       dismissedReminderIds = new Set(JSON.parse(savedDismissed));
     }
@@ -447,10 +447,12 @@
 
     if (nextUpcomingEvent) {
       currentActiveBannerEventId = nextUpcomingEvent.evt.id;
+      window.currentActiveBannerEventId = currentActiveBannerEventId;
       bannerTitle.textContent = `${nextUpcomingEvent.evt.title} at ${formatTimeDisplay(nextUpcomingEvent.evt.time)} (in ${nextUpcomingEvent.diffMinutes} mins)`;
       banner.classList.remove('hidden');
     } else {
       currentActiveBannerEventId = null;
+      window.currentActiveBannerEventId = null;
       banner.classList.add('hidden');
     }
   }
@@ -898,19 +900,9 @@
               </div>
             </button>
 
-            <div class="flex items-center gap-1 shrink-0 ml-2">
-              <!-- 1-Tap Add to Calendar Alarm Button -->
-              <button 
-                onclick="window.downloadEventCalendar('${evt.id}', '${dateKey}')" 
-                title="Add 1-Hour Alarm to Phone Calendar" 
-                class="px-2 py-1 text-[10px] font-bold bg-cream-100 hover:bg-cream-200 text-coffee-800 border border-cream-300 rounded-lg flex items-center gap-1 touch-btn"
-              >
-                <i class="fa-solid fa-calendar-plus text-caramel-600"></i> Alarm
-              </button>
-              <button onclick="window.deleteDayEvent('${evt.id}')" class="p-1.5 text-coffee-400 hover:text-rose-700 touch-btn">
-                <i class="fa-solid fa-xmark text-xs"></i>
-              </button>
-            </div>
+            <button onclick="window.deleteDayEvent('${evt.id}')" class="p-1.5 text-coffee-400 hover:text-rose-700 touch-btn ml-2 shrink-0" title="Delete">
+              <i class="fa-solid fa-xmark text-xs"></i>
+            </button>
           </div>
         </div>
       `).join('');
@@ -1617,17 +1609,37 @@
     }
 
     // Dismiss in-app upcoming reminder banner (permanently dismisses this specific event from popping up again)
-    document.getElementById('dismissReminderBannerBtn').addEventListener('click', () => {
+    window.dismissUpcomingReminderBanner = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
       if (currentActiveBannerEventId) {
         dismissedReminderIds.add(currentActiveBannerEventId);
-        try {
-          sessionStorage.setItem('progress_dismissed_reminders', JSON.stringify([...dismissedReminderIds]));
-        } catch (e) {}
       }
+      try {
+        const today = new Date();
+        const events = trackerData.dayEvents[getDayDateKey(today)] || [];
+        const now = new Date();
+        events.forEach(ev => {
+          if (!ev.time) return;
+          const [h, m] = ev.time.split(':').map(Number);
+          const evTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h, m, 0);
+          const diffMins = Math.floor((evTime - now) / 60000);
+          if (diffMins >= 0 && diffMins <= 60) {
+            dismissedReminderIds.add(ev.id);
+          }
+        });
+        localStorage.setItem('progress_dismissed_reminders', JSON.stringify([...dismissedReminderIds]));
+      } catch (err) {}
+
       const banner = document.getElementById('upcomingReminderBanner');
-      banner.classList.add('hidden');
+      if (banner) banner.classList.add('hidden');
       currentActiveBannerEventId = null;
-    });
+      window.currentActiveBannerEventId = null;
+    };
+
+    const dismissBtn = document.getElementById('dismissReminderBannerBtn');
+    if (dismissBtn) {
+      dismissBtn.addEventListener('click', window.dismissUpcomingReminderBanner);
+    }
 
     // Open Today Button in 7-day row
     const openTodayAction = () => {

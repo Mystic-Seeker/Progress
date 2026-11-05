@@ -156,7 +156,7 @@
           <span id="upcomingReminderTitle" class="text-xs font-black truncate block leading-tight">Doctor Appointment at 4:30 PM</span>
         </div>
       </div>
-      <button id="dismissReminderBannerBtn" class="text-coffee-900 hover:text-coffee-950 text-base p-1 touch-btn">
+      <button id="dismissReminderBannerBtn" onclick="window.dismissUpcomingReminderBanner(event)" class="text-coffee-900 hover:text-coffee-950 text-base p-1 touch-btn" title="Dismiss Reminder">
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
@@ -645,11 +645,31 @@
   </div>
 
   <!-- APPLICATION JAVASCRIPT -->
-  <script src="app.js"></script>
+  <script>
+    // Immediate inline dismissal handler so close button ALWAYS works
+    window.dismissUpcomingReminderBanner = function (e) {
+      if (e) { e.preventDefault(); e.stopPropagation(); }
+      const banner = document.getElementById('upcomingReminderBanner');
+      if (banner) banner.classList.add('hidden');
+      try {
+        const dismissed = JSON.parse(localStorage.getItem('progress_dismissed_reminders') || '[]');
+        if (window.currentActiveBannerEventId) {
+          dismissed.push(window.currentActiveBannerEventId);
+        }
+        dismissed.push('evt_sample_1', 'evt_sample_2', 'evt_sample_3');
+        localStorage.setItem('progress_dismissed_reminders', JSON.stringify([...new Set(dismissed)]));
+      } catch (err) {}
+    };
+  </script>
+  <script src="app.js?v=20261106_v8"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => {
+            reg.update();
+          })
+          .catch(err => console.log('SW error:', err));
       });
     }
 

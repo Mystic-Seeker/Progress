@@ -312,7 +312,7 @@
   }
 
   // --- Notification System ---
-  function requestNotificationPermission() {
+  function requestNotificationPermission(showFeedback = false) {
     if (!('Notification' in window)) {
       alert('Notifications are not supported in this browser.');
       return;
@@ -322,32 +322,52 @@
         trackerData.notificationsEnabled = true;
         saveData();
         updateNotificationUI();
-        sendSystemNotification('🔔 Reminders Enabled', 'You will be alerted 1 hour before your scheduled events!');
+        sendSystemNotification('🔔 Reminders Active!', 'Progress will alert you 1 hour before scheduled events.');
+        if (showFeedback) {
+          alert('✅ Notification sent! Check your phone notification shade or status bar.');
+        }
       } else {
         trackerData.notificationsEnabled = false;
         saveData();
         updateNotificationUI();
-        alert('Notification permission was not granted.');
+        alert('⚠️ Notification permission was blocked. To fix: Open phone Settings ➔ Apps ➔ Chrome ➔ Notifications and turn them ON.');
       }
     });
   }
 
   function sendSystemNotification(title, body) {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    if (!('Notification' in window)) return Promise.resolve(false);
+    if (Notification.permission !== 'granted') return Promise.resolve(false);
 
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.showNotification(title, {
-          body,
-          icon: 'icon-192.png',
-          badge: 'icon-192.png',
-          vibrate: [200, 100, 200]
-        });
+    const options = {
+      body,
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      vibrate: [250, 100, 250, 100, 300],
+      tag: 'event-reminder-' + Date.now(),
+      renotify: true,
+      requireInteraction: true
+    };
+
+    if ('serviceWorker' in navigator) {
+      return navigator.serviceWorker.ready.then((reg) => {
+        return reg.showNotification(title, options).then(() => true);
+      }).catch(err => {
+        console.warn('SW showNotification error:', err);
+        try {
+          new Notification(title, options);
+          return true;
+        } catch (e) {
+          return false;
+        }
       });
     } else {
       try {
-        new Notification(title, { body, icon: 'icon-192.png' });
-      } catch (e) {}
+        new Notification(title, options);
+        return Promise.resolve(true);
+      } catch (e) {
+        return Promise.resolve(false);
+      }
     }
   }
 
@@ -392,17 +412,17 @@
       // Trigger 1-hour before notification (between 0 and 60 minutes)
       if (diffMinutes <= 60 && diffMinutes >= 0) {
         if (!evt.notified && evt.alertOneHour !== false) {
-          evt.notified = true;
-          saveData();
-
-          // Send system notification
-          sendSystemNotification(
-            `⏰ Reminder: ${evt.title}`,
-            `Event starts in ${diffMinutes} minutes (at ${formatTimeDisplay(evt.time)})!`
-          );
-          playAlertChime();
-          if (navigator.vibrate) {
-            try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) {}
+          if (('Notification' in window) && Notification.permission === 'granted') {
+            sendSystemNotification(
+              `⏰ 1-Hour Reminder: ${evt.title}`,
+              `Event starts in ${diffMinutes} minutes (at ${formatTimeDisplay(evt.time)})!`
+            );
+            evt.notified = true;
+            saveData();
+            playAlertChime();
+            if (navigator.vibrate) {
+              try { navigator.vibrate([200, 100, 200, 100, 300]); } catch (e) {}
+            }
           }
         }
 
@@ -426,7 +446,7 @@
     }
   }
 
-  // --- 1-Tap Phone Calendar Alarm Sync (.ICS file) ---
+  // --- 1-Tap Phone Calendar Alarm Sync (Google Calendar + .ICS file) ---
   window.downloadEventCalendar = function (eventId, dateKey) {
     const events = trackerData.dayEvents[dateKey] || [];
     const evt = events.find(e => e.id === eventId);
@@ -435,6 +455,13 @@
     const [year, month, day] = dateKey.split('-').map(Number);
     const [hours, minutes] = evt.time.split(':').map(Number);
 
+    const pad = n => String(n).padStart(2, '0');
+    const startStr = `${year}${pad(month)}${pad(day)}T${pad(hours)}${pad(minutes)}00`;
+    const endMinutes = (minutes + 60) % 60;
+    const endHours = hours + Math.floor((minutes + 60) / 60);
+    const endStr = `${year}${pad(month)}${pad(day)}T${pad(endHours)}${pad(endMinutes)}00`;
+
+    // 1. Standard .ics file download with 1-Hour alarm trigger (-PT60M)
     const startDate = new Date(year, month - 1, day, hours, minutes);
     const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hr duration
 
@@ -442,7 +469,6 @@
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     }
 
-    // Standard .ics format with 1-Hour alarm trigger (-PT60M)
     const icsContent = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
@@ -453,11 +479,11 @@
       `DTSTART:${formatICSDate(startDate)}`,
       `DTEND:${formatICSDate(endDate)}`,
       `SUMMARY:${evt.title}`,
-      `DESCRIPTION:Event from Weekly Progress Tracker`,
+      `DESCRIPTION:Event from Progress Habit Tracker`,
       'BEGIN:VALARM',
       'TRIGGER:-PT60M', // 1 HOUR BEFORE ALARM
       'ACTION:DISPLAY',
-      `DESCRIPTION:Reminder: ${evt.title} in 1 hour`,
+      `DESCRIPTION:1 Hour Reminder: ${evt.title}`,
       'END:VALARM',
       'END:VEVENT',
       'END:VCALENDAR'
@@ -466,10 +492,16 @@
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
     const link = document.createElement('a');
     link.href = window.URL.createObjectURL(blob);
-    link.setAttribute('download', `${evt.title.replace(/\s+/g, '_')}_reminder.ics`);
+    link.setAttribute('download', `${evt.title.replace(/\s+/g, '_')}_1h_alarm.ics`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+
+    // Option to open Google Calendar directly
+    const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(evt.title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent('Progress App Reminder: ' + evt.title)}`;
+    if (confirm(`1-Hour Alarm file downloaded for your phone calendar!\n\nTap OK to also open in Google Calendar directly.`)) {
+      window.open(gcalUrl, '_blank');
+    }
   };
 
   // --- Date & Time Utilities ---
@@ -925,14 +957,12 @@
       }).join('');
     }
 
-    // 3. Combined Progress Score for this Day
-    const completedEventsCount = events.filter(e => e.completed).length;
-    const totalItems = goals.length + events.length;
-    const totalDone = completedHabitsCount + completedEventsCount;
-    const pct = totalItems > 0 ? Math.round((totalDone / totalItems) * 100) : 0;
+    // 3. Habit Progress Score for this Day (Excludes specific events/tasks as requested)
+    const totalHabits = goals.length;
+    const pct = totalHabits > 0 ? Math.round((completedHabitsCount / totalHabits) * 100) : 0;
 
     document.getElementById('dayModalScore').textContent = `${pct}%`;
-    document.getElementById('dayModalSub').textContent = `(${totalDone} of ${totalItems} items completed)`;
+    document.getElementById('dayModalSub').textContent = `(${completedHabitsCount} of ${totalHabits} habits completed)`;
     document.getElementById('dayModalProgressBar').style.width = `${pct}%`;
   }
 
@@ -970,26 +1000,26 @@
           onclick="window.openDayView(${i})"
           class="flex flex-col items-center justify-center py-2 px-0.5 rounded-xl transition-all border transform active:scale-95 touch-btn ${
             isToday 
-              ? 'bg-coffee-800 text-cream-50 border-coffee-900 shadow-2xs' 
-              : 'bg-white border-cream-300 text-coffee-800 hover:bg-cream-100'
+              ? 'bg-coffee-800 text-cream-50 border-coffee-800 shadow-2xs font-black' 
+              : 'bg-cream-50/80 border-cream-200/80 text-coffee-800 hover:bg-cream-100'
           }"
         >
-          <span class="text-[9px] font-bold opacity-75 uppercase leading-none mb-0.5">${dayLetters[i]}</span>
-          <span class="text-xs font-black leading-none">${d.getDate()}</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider leading-none mb-0.5 ${isToday ? 'text-amber-200' : 'text-coffee-400'}">${dayLetters[i]}</span>
+          <span class="text-xs font-black leading-none ${isToday ? 'text-cream-50' : 'text-coffee-900'}">${d.getDate()}</span>
           
           ${fest ? `
-            <span class="text-[7.5px] font-black text-amber-900 bg-amber-100 border border-amber-300 px-1 py-0.5 rounded truncate max-w-full block text-center leading-tight mt-1 shadow-2xs" title="${fest.fullName}">
+            <span class="text-[7.5px] font-bold text-amber-900 bg-amber-100/90 rounded px-1 py-0.2 mt-0.5 max-w-[95%] truncate leading-tight block text-center" title="${fest.fullName}">
               ${fest.emoji} ${fest.name}
             </span>
           ` : ''}
 
           <div class="flex items-center gap-0.5 mt-1">
             ${dayTicks > 0 
-              ? `<span class="text-[9px] font-extrabold ${isToday ? 'text-amber-300' : 'text-coffee-600'}">${dayTicks}✓</span>` 
-              : `<span class="text-[8px] text-cream-300">•</span>`
+              ? `<span class="text-[9px] font-black ${isToday ? 'text-amber-300' : 'text-coffee-700'}">${dayTicks}✓</span>` 
+              : `<span class="text-[8px] text-cream-300 leading-none">•</span>`
             }
             ${hasEvents 
-              ? `<i class="fa-solid fa-bell text-[8px] ${allEventsDone ? 'text-emerald-500' : 'text-amber-500'}" title="${events.length} event(s)"></i>` 
+              ? `<i class="fa-solid fa-bell text-[7.5px] ${allEventsDone ? 'text-emerald-500' : 'text-amber-500'}" title="${events.length} event(s)"></i>` 
               : ''
             }
           </div>
@@ -1070,11 +1100,11 @@
       const isToday = (i === todayIndex) && isThisActualWeek;
 
       const dot = document.createElement('div');
-      dot.className = `w-6 h-6 rounded-lg flex items-center justify-center text-[10px] font-black transition-all ${
+      dot.className = `w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold transition-all ${
         active 
-          ? 'bg-coffee-800 text-cream-50 shadow-2xs' 
-          : 'bg-cream-200 text-coffee-500'
-      } ${isToday ? 'ring-2 ring-caramel-500 ring-offset-1 font-black' : ''}`;
+          ? 'bg-coffee-800 text-cream-50 font-black' 
+          : 'bg-cream-100 text-coffee-400 font-medium'
+      } ${isToday ? 'ring-1.5 ring-caramel-500 font-black' : ''}`;
       dot.textContent = dayShorts[i];
       dayDotsContainer.appendChild(dot);
     }
@@ -1130,40 +1160,40 @@
       const habitStreak = calculateHabitStreak(goal.id);
 
       html += `
-        <div class="bg-cream-50 border border-cream-300 rounded-3xl p-3.5 shadow-xs transition-shadow">
+        <div class="bg-white border border-cream-200/90 rounded-2xl p-3 shadow-2xs hover:shadow-xs transition-all">
           
-          <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-8 h-8 rounded-xl flex items-center justify-center text-cream-50 shrink-0 text-xs shadow-2xs" style="background-color: ${themeColor}">
+          <div class="flex items-center justify-between mb-2.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-cream-50 shrink-0 text-xs" style="background-color: ${themeColor}">
                 <i class="fa-solid ${icon}"></i>
               </div>
               <div class="min-w-0">
-                <div class="font-extrabold text-coffee-900 text-sm truncate flex items-center gap-1.5">
+                <div class="font-extrabold text-coffee-900 text-xs truncate flex items-center gap-1.5 leading-snug">
                   <span>${goal.name}</span>
                   ${isMet ? '<i class="fa-solid fa-circle-check text-emerald-700 text-xs" title="Goal Met!"></i>' : ''}
                 </div>
-                <div class="text-[10px] text-coffee-600 font-bold flex items-center gap-1.5 flex-wrap">
-                  <span class="px-1.5 py-0.2 rounded bg-cream-200 text-coffee-700">${goal.category}</span>
+                <div class="text-[9px] text-coffee-500 font-bold flex items-center gap-1.5 flex-wrap">
+                  <span class="px-1.5 py-0.2 rounded bg-cream-100 text-coffee-700">${goal.category}</span>
                   ${goal.timeOfDay && goal.timeOfDay !== 'Anytime' ? `<span class="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800">${goal.timeOfDay}</span>` : ''}
-                  ${habitStreak > 0 ? `<span class="text-caramel-600 font-extrabold flex items-center gap-0.5"><i class="fa-solid fa-fire text-amber-600 text-[9px]"></i> ${habitStreak}d streak</span>` : ''}
+                  ${habitStreak > 0 ? `<span class="text-caramel-600 font-extrabold flex items-center gap-0.5"><i class="fa-solid fa-fire text-amber-600 text-[8px]"></i> ${habitStreak}d</span>` : ''}
                 </div>
               </div>
             </div>
 
             <div class="flex items-center gap-1 shrink-0">
-              <span class="text-xs font-black px-2 py-0.5 rounded-full ${isMet ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-cream-200 text-coffee-800'}">
-                ${countTicked} / ${goal.target} ✓
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-full ${isMet ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-cream-100 text-coffee-800'}">
+                ${countTicked}/${goal.target} ✓
               </span>
-              <button onclick="window.openEditGoal('${goal.id}')" class="p-1.5 text-coffee-500 hover:text-coffee-900 touch-btn">
+              <button onclick="window.openEditGoal('${goal.id}')" class="p-1 text-coffee-400 hover:text-coffee-800 touch-btn" title="Edit">
                 <i class="fa-solid fa-pen-to-square text-xs"></i>
               </button>
-              <button onclick="window.deleteGoal('${goal.id}')" class="p-1.5 text-coffee-500 hover:text-rose-700 touch-btn">
+              <button onclick="window.deleteGoal('${goal.id}')" class="p-1 text-coffee-400 hover:text-rose-700 touch-btn" title="Delete">
                 <i class="fa-solid fa-trash-can text-xs"></i>
               </button>
             </div>
           </div>
 
-          <div class="grid grid-cols-7 gap-1.5 pt-1">
+          <div class="grid grid-cols-7 gap-1 pt-0.5">
             ${logs.map((isTicked, idx) => {
               const ticked = isTicked === 1;
               const isToday = isThisActualWeek && (idx === todayIndex);
@@ -1172,17 +1202,17 @@
                 <button 
                   onclick="window.toggleTick('${goal.id}', ${idx})"
                   title="${dayFull[idx]}: Click to toggle"
-                  class="h-11 rounded-2xl flex flex-col items-center justify-center transition-all transform active:scale-90 touch-btn border ${
+                  class="h-10 rounded-xl flex flex-col items-center justify-center transition-all transform active:scale-90 touch-btn border ${
                     ticked 
-                      ? 'shadow-xs text-cream-50 font-black' 
-                      : 'bg-white border-cream-300 text-coffee-700 hover:border-coffee-500'
-                  } ${isToday && !ticked ? 'border-2 border-caramel-500 font-extrabold' : ''}"
+                      ? 'shadow-2xs text-cream-50 font-black' 
+                      : 'bg-cream-50 border-cream-200/80 text-coffee-600 hover:bg-cream-100'
+                  } ${isToday && !ticked ? 'ring-1.5 ring-caramel-500/80 border-caramel-400' : ''}"
                   style="${ticked ? `background-color: ${themeColor}; border-color: ${themeColor};` : ''}"
                 >
-                  <span class="text-[10px] font-bold opacity-80 leading-none mb-0.5">${dayLabels[idx]}</span>
+                  <span class="text-[9px] font-bold opacity-75 leading-none mb-0.5">${dayLabels[idx]}</span>
                   ${ticked 
                     ? '<i class="fa-solid fa-check text-xs check-animation"></i>' 
-                    : '<span class="text-[13px] text-cream-300 leading-none font-bold">•</span>'
+                    : '<span class="text-[10px] text-cream-300 leading-none font-bold">•</span>'
                   }
                 </button>
               `;
@@ -1538,10 +1568,44 @@
       playTickSound(true);
     });
 
+    // Toggle Collapsible Daily Activity Bar Chart
+    const toggleChartBtn = document.getElementById('toggleChartBtn');
+    if (toggleChartBtn) {
+      toggleChartBtn.addEventListener('click', () => {
+        const chartBox = document.getElementById('chartContainer');
+        if (chartBox) {
+          const isHidden = chartBox.classList.toggle('hidden');
+          if (!isHidden) {
+            renderDailyBarChart();
+          }
+        }
+      });
+    }
+
     // Notification Permission triggers
-    document.getElementById('notifyPermissionBtn').addEventListener('click', requestNotificationPermission);
+    document.getElementById('notifyPermissionBtn').addEventListener('click', () => requestNotificationPermission(false));
     const modalNotifyBtn = document.getElementById('modalNotifyBtn');
-    if (modalNotifyBtn) modalNotifyBtn.addEventListener('click', requestNotificationPermission);
+    if (modalNotifyBtn) modalNotifyBtn.addEventListener('click', () => requestNotificationPermission(false));
+
+    const modalTestBtn = document.getElementById('modalTestNotifyBtn');
+    if (modalTestBtn) {
+      modalTestBtn.addEventListener('click', () => {
+        if (!('Notification' in window)) {
+          alert('Notifications are not supported in this browser.');
+          return;
+        }
+        if (Notification.permission === 'granted') {
+          sendSystemNotification(
+            '🔔 Test Alert: Progress App',
+            '1-Hour reminders are enabled and working properly on your phone!'
+          ).then(sent => {
+            alert(sent ? '✅ Test notification sent! Check your phone status bar or notification shade.' : '⚠️ Notification blocked by device settings.');
+          });
+        } else {
+          requestNotificationPermission(true);
+        }
+      });
+    }
 
     // Dismiss in-app upcoming reminder banner
     document.getElementById('dismissReminderBannerBtn').addEventListener('click', () => {
@@ -1607,11 +1671,11 @@
     document.querySelectorAll('.filter-tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.filter-tab').forEach(t => {
-          t.classList.remove('bg-coffee-800', 'text-cream-50', 'active');
-          t.classList.add('bg-cream-50', 'text-coffee-700', 'border', 'border-cream-300');
+          t.classList.remove('bg-coffee-800', 'text-cream-50', 'active', 'font-bold');
+          t.classList.add('bg-white', 'text-coffee-600', 'border', 'border-cream-200', 'font-semibold');
         });
-        tab.classList.remove('bg-cream-50', 'text-coffee-700', 'border', 'border-cream-300');
-        tab.classList.add('bg-coffee-800', 'text-cream-50', 'active');
+        tab.classList.remove('bg-white', 'text-coffee-600', 'border', 'border-cream-200', 'font-semibold');
+        tab.classList.add('bg-coffee-800', 'text-cream-50', 'active', 'font-bold');
 
         activeFilter = tab.dataset.filter;
         renderGoalsCards();

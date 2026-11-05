@@ -114,47 +114,45 @@
 <body class="bg-cream-100 text-coffee-900 min-h-screen flex flex-col justify-between antialiased selection:bg-coffee-200">
 
   <!-- MOBILE-OPTIMIZED MAIN CONTAINER -->
-  <div class="w-full max-w-lg mx-auto flex-1 flex flex-col px-4 pt-3 pb-28">
+  <div class="w-full max-w-lg mx-auto flex-1 flex flex-col px-4 pt-3.5 pb-24">
     
-    <!-- TOP APP BAR -->
-    <header class="flex items-center justify-between py-2 mb-2">
+    <!-- TOP APP BAR (CLEAN & MINIMAL) -->
+    <header class="flex items-center justify-between py-1.5 mb-2.5">
       <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-coffee-800 text-cream-50 flex items-center justify-center shadow-xs">
-          <i class="fa-solid fa-seedling text-base text-amber-200"></i>
-        </div>
+        <img src="icon-192.png" alt="Progress" class="w-9 h-9 rounded-xl shadow-xs object-cover border border-coffee-900/10">
         <div>
           <div class="flex items-center gap-1.5">
-            <h1 class="text-lg font-extrabold text-coffee-900 leading-tight">Progress</h1>
-            <span id="headerYearText" class="text-[10px] font-black bg-cream-200 border border-cream-300 text-coffee-900 px-1.5 py-0.2 rounded-md">2026</span>
+            <h1 class="text-base font-extrabold text-coffee-900 tracking-tight leading-tight">Progress</h1>
+            <span id="headerYearText" class="text-[10px] font-bold bg-white border border-cream-300 text-coffee-800 px-1.5 py-0.2 rounded-md shadow-2xs">2026</span>
           </div>
-          <p class="text-[11px] text-coffee-600 font-medium">Habits & Event Reminders</p>
+          <p class="text-[10px] text-coffee-500 font-medium">Daily Habits & Events</p>
         </div>
       </div>
 
-      <div class="flex items-center gap-1.5">
+      <div class="flex items-center gap-1">
         <!-- Notification Permission Button -->
-        <button id="notifyPermissionBtn" class="w-9 h-9 rounded-xl bg-cream-50 border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Enable Reminders">
+        <button id="notifyPermissionBtn" class="w-8 h-8 rounded-xl bg-white border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Enable Reminders">
           <i id="notifyBellIcon" class="fa-solid fa-bell text-xs"></i>
         </button>
         <!-- Sound Mute/Unmute Toggle -->
-        <button id="toggleSoundBtn" class="w-9 h-9 rounded-xl bg-cream-50 border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Toggle Sound">
+        <button id="toggleSoundBtn" class="w-8 h-8 rounded-xl bg-white border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Toggle Sound">
           <i id="soundIcon" class="fa-solid fa-volume-high text-xs"></i>
         </button>
         <!-- Settings -->
-        <button id="openSettingsBtn" class="w-9 h-9 rounded-xl bg-cream-50 border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Settings">
-          <i class="fa-solid fa-gear text-sm"></i>
+        <button id="openSettingsBtn" class="w-8 h-8 rounded-xl bg-white border border-cream-200 text-coffee-700 flex items-center justify-center hover:bg-cream-200 transition-colors shadow-2xs touch-btn" title="Settings">
+          <i class="fa-solid fa-gear text-xs"></i>
         </button>
       </div>
     </header>
 
     <!-- UPCOMING 1-HOUR EVENT REMINDER BANNER (DYNAMIC) -->
-    <div id="upcomingReminderBanner" class="hidden bg-amber-500 text-coffee-950 rounded-2xl p-3 mb-3 shadow-sm border border-amber-600/30 flex items-center justify-between gap-2.5 animate-pulse">
+    <div id="upcomingReminderBanner" class="hidden bg-amber-500 text-coffee-950 rounded-2xl p-3 mb-2.5 shadow-sm border border-amber-600/30 flex items-center justify-between gap-2.5 animate-pulse">
       <div class="flex items-center gap-2.5 min-w-0">
-        <div class="w-8 h-8 rounded-xl bg-coffee-900 text-amber-300 flex items-center justify-center shrink-0">
-          <i class="fa-solid fa-clock text-sm"></i>
+        <div class="w-7 h-7 rounded-lg bg-coffee-900 text-amber-300 flex items-center justify-center shrink-0">
+          <i class="fa-solid fa-clock text-xs"></i>
         </div>
         <div class="min-w-0">
-          <span class="text-[10px] font-black uppercase tracking-wider block leading-tight text-coffee-900">⏰ Event Starting Soon (In 1 Hour)</span>
+          <span class="text-[9px] font-black uppercase tracking-wider block leading-tight text-coffee-900">⏰ Starting Soon (In 1 Hour)</span>
           <span id="upcomingReminderTitle" class="text-xs font-black truncate block leading-tight">Doctor Appointment at 4:30 PM</span>
         </div>
       </div>
@@ -163,46 +161,39 @@
       </button>
     </div>
 
-    <!-- DAILY ATOMIC HABIT MINDSET QUOTE -->
-    <div class="bg-coffee-900 text-cream-50 rounded-2xl p-3 mb-3 shadow-xs relative overflow-hidden">
-      <div class="flex items-start justify-between gap-2">
-        <div class="flex items-center gap-1.5 text-caramel-500 text-[10px] font-extrabold uppercase tracking-widest">
-          <i class="fa-solid fa-quote-left text-[9px]"></i>
-          <span>Daily Mindset</span>
-        </div>
-        <button id="nextQuoteBtn" class="text-coffee-300 hover:text-white text-[11px] px-1 touch-btn" title="Next Quote">
-          <i class="fa-solid fa-arrows-rotate"></i>
-        </button>
+    <!-- DAILY ATOMIC HABIT MINDSET QUOTE (CLEAN & COMPACT) -->
+    <div class="bg-white/80 border border-cream-200/90 rounded-2xl px-3.5 py-2.5 mb-2.5 shadow-2xs flex items-center justify-between gap-3">
+      <div class="min-w-0 flex-1">
+        <p id="dailyQuoteText" class="quote-font italic text-xs text-coffee-900 leading-snug truncate">
+          "You do not rise to the level of your goals. You fall to the level of your systems."
+        </p>
+        <span id="dailyQuoteAuthor" class="text-[10px] text-coffee-500 font-medium block truncate mt-0.5">— James Clear</span>
       </div>
-      <p id="dailyQuoteText" class="quote-font italic text-sm text-cream-100 mt-1 leading-snug">
-        "You do not rise to the level of your goals. You fall to the level of your systems."
-      </p>
-      <span id="dailyQuoteAuthor" class="text-[10px] text-coffee-300 font-semibold block text-right mt-0.5">— James Clear</span>
+      <button id="nextQuoteBtn" class="w-7 h-7 rounded-lg bg-cream-100 text-coffee-600 hover:text-coffee-900 hover:bg-cream-200 text-[10px] flex items-center justify-center shrink-0 touch-btn transition-colors" title="Next Quote">
+        <i class="fa-solid fa-arrows-rotate"></i>
+      </button>
     </div>
 
-    <!-- WEEK SELECTOR PILL WITH YEAR & MINI CALENDAR TRIGGER -->
-    <div class="bg-cream-50 border border-cream-300/80 rounded-2xl p-1.5 flex items-center justify-between mb-2 shadow-2xs">
-      <button id="prevWeekBtn" class="w-8 h-8 rounded-xl flex items-center justify-center text-coffee-700 hover:bg-cream-200 active:scale-95 transition-all touch-btn">
+    <!-- WEEK SELECTOR BAR (CLEAN & SLEEK) -->
+    <div class="bg-white border border-cream-200/90 rounded-2xl p-1.5 flex items-center justify-between mb-2 shadow-2xs">
+      <button id="prevWeekBtn" class="w-8 h-8 rounded-xl flex items-center justify-center text-coffee-700 hover:bg-cream-100 active:scale-95 transition-all touch-btn">
         <i class="fa-solid fa-chevron-left text-xs"></i>
       </button>
       
-      <button id="toggleMiniCalBtn" class="text-center px-2 py-0.5 rounded-xl hover:bg-cream-200 flex flex-col items-center touch-btn transition-colors group cursor-pointer" title="Tap to open Mini Calendar">
+      <button id="toggleMiniCalBtn" class="text-center px-2 py-0.5 rounded-xl hover:bg-cream-100 flex flex-col items-center touch-btn transition-colors group cursor-pointer" title="Tap for Mini Calendar">
         <div class="flex items-center gap-1.5">
-          <span id="currentWeekRange" class="font-extrabold text-xs text-coffee-900 block tracking-tight">Nov 02 - Nov 08</span>
-          <span id="currentYearBadge" class="text-[10px] font-black bg-coffee-800 text-cream-50 px-1.5 py-0.2 rounded-md shadow-2xs">2026</span>
-          <i id="miniCalChevron" class="fa-solid fa-chevron-down text-[10px] text-coffee-500 transition-transform duration-200 group-hover:text-coffee-900"></i>
+          <span id="currentWeekRange" class="font-extrabold text-xs text-coffee-900 tracking-tight">Nov 02 - Nov 08</span>
+          <span id="currentYearBadge" class="text-[9px] font-bold bg-coffee-800 text-cream-50 px-1.5 py-0.2 rounded-md">2026</span>
+          <i id="miniCalChevron" class="fa-solid fa-chevron-down text-[9px] text-coffee-400 group-hover:text-coffee-900 transition-transform duration-200"></i>
         </div>
-        <span id="currentWeekSubtitle" class="text-[10px] text-caramel-600 font-bold uppercase tracking-wider flex items-center gap-1">
-          <i class="fa-regular fa-calendar-days text-[9px]"></i>
-          <span>This Week (Tap for Mini Calendar)</span>
-        </span>
+        <span id="currentWeekSubtitle" class="text-[10px] text-caramel-600 font-bold uppercase tracking-wider">This Week</span>
       </button>
 
       <div class="flex items-center gap-1">
-        <button id="todayBtn" class="px-2.5 py-1 text-[11px] font-bold bg-coffee-800 text-cream-50 rounded-lg shadow-2xs active:scale-95 transition-all touch-btn">
+        <button id="todayBtn" class="px-2.5 py-1 text-[11px] font-bold bg-coffee-800 hover:bg-coffee-900 text-cream-50 rounded-lg shadow-2xs active:scale-95 transition-all touch-btn">
           Today
         </button>
-        <button id="nextWeekBtn" class="w-8 h-8 rounded-xl flex items-center justify-center text-coffee-700 hover:bg-cream-200 active:scale-95 transition-all touch-btn">
+        <button id="nextWeekBtn" class="w-8 h-8 rounded-xl flex items-center justify-center text-coffee-700 hover:bg-cream-100 active:scale-95 transition-all touch-btn">
           <i class="fa-solid fa-chevron-right text-xs"></i>
         </button>
       </div>
@@ -238,13 +229,13 @@
     </div>
 
     <!-- INTERACTIVE 7-DAY PICKER / DIRECT DAY FOCUS ROW -->
-    <div class="bg-cream-50 border border-cream-300 rounded-2xl p-2.5 mb-3 shadow-2xs">
-      <div class="flex items-center justify-between px-1 mb-2">
-        <span class="text-[10px] font-extrabold uppercase tracking-wider text-coffee-600 flex items-center gap-1">
-          <i class="fa-solid fa-calendar-day text-caramel-600"></i> Tap Day for Tasks & Reminders
+    <div class="bg-white border border-cream-200/90 rounded-2xl p-2 mb-2.5 shadow-2xs">
+      <div class="flex items-center justify-between px-1 mb-1.5">
+        <span class="text-[9px] font-bold uppercase tracking-wider text-coffee-500 flex items-center gap-1">
+          <i class="fa-solid fa-calendar-day text-caramel-600 text-[10px]"></i> Tap Day for Agenda & Reminders
         </span>
-        <button id="openTodayViewBtn" class="text-[11px] font-black text-caramel-600 hover:text-coffee-900 flex items-center gap-1 touch-btn">
-          Open Today <i class="fa-solid fa-arrow-right text-[10px]"></i>
+        <button id="openTodayViewBtn" class="text-[10px] font-bold text-caramel-600 hover:text-coffee-900 flex items-center gap-1 touch-btn">
+          Open Today <i class="fa-solid fa-arrow-right text-[9px]"></i>
         </button>
       </div>
       
@@ -254,120 +245,119 @@
       </div>
     </div>
 
-    <!-- WEEKLY SCORE & SUMMARY CARD -->
-    <div class="bg-cream-50 border border-cream-300 rounded-3xl p-4 mb-3 shadow-xs relative overflow-hidden">
-      <div class="flex items-center justify-between mb-3">
+    <!-- WEEKLY MOMENTUM & SUMMARY CARD (CLEAN & UNIFIED) -->
+    <div class="bg-white border border-cream-200/90 rounded-2xl p-3.5 mb-2.5 shadow-2xs">
+      <div class="flex items-center justify-between mb-2">
         <div>
-          <span class="text-[10px] font-extrabold uppercase tracking-widest text-coffee-500">Weekly Achievement</span>
+          <span class="text-[9px] font-bold uppercase tracking-wider text-coffee-400">Weekly Momentum</span>
           <div class="flex items-baseline gap-2 mt-0.5">
-            <h2 id="statCompletion" class="text-3xl font-black text-coffee-900 tracking-tight">0%</h2>
-            <span id="statProgressSub" class="text-xs text-coffee-600 font-semibold">0 / 0 tasks ticked</span>
+            <h2 id="statCompletion" class="text-2xl font-black text-coffee-900 tracking-tight leading-none">0%</h2>
+            <span id="statProgressSub" class="text-[11px] text-coffee-500 font-medium">0 / 0 ticked</span>
           </div>
         </div>
-        <div class="flex flex-col items-center justify-center bg-cream-200 border border-cream-300 px-3 py-1.5 rounded-2xl">
-          <span class="text-[10px] font-bold text-coffee-600 uppercase">Streak</span>
-          <span id="statOverallStreak" class="text-base font-black text-coffee-900 flex items-center gap-1">
-            <i class="fa-solid fa-fire text-amber-600"></i> 0d
-          </span>
+        <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1 bg-cream-100 border border-cream-200 px-2.5 py-1 rounded-xl">
+            <span class="text-[9px] font-bold text-coffee-500 uppercase">Streak</span>
+            <span id="statOverallStreak" class="text-xs font-black text-coffee-900 flex items-center gap-1">
+              <i class="fa-solid fa-fire text-amber-600"></i> 0d
+            </span>
+          </div>
+          <!-- Toggle Chart Button -->
+          <button id="toggleChartBtn" class="w-8 h-8 rounded-xl bg-cream-100 border border-cream-200 text-coffee-600 hover:text-coffee-900 hover:bg-cream-200 flex items-center justify-center text-xs transition-colors touch-btn" title="Toggle Daily Activity Chart">
+            <i class="fa-solid fa-chart-simple"></i>
+          </button>
         </div>
       </div>
 
-      <!-- High contrast progress bar -->
-      <div class="w-full bg-cream-200 rounded-full h-3 overflow-hidden p-0.5 border border-cream-300/60">
-        <div id="statProgressBar" class="bg-gradient-to-r from-coffee-700 to-caramel-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+      <!-- Slim elegant progress bar -->
+      <div class="w-full bg-cream-100 rounded-full h-2 overflow-hidden mb-2.5">
+        <div id="statProgressBar" class="bg-gradient-to-r from-coffee-800 to-caramel-500 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
       </div>
 
-      <!-- Days active dots -->
-      <div class="flex items-center justify-between mt-3 pt-2.5 border-t border-cream-200">
-        <span class="text-[11px] font-bold text-coffee-700">Days Active:</span>
-        <div class="flex gap-1.5" id="activeDaysIndicators">
+      <!-- Days active dots & best day -->
+      <div class="flex items-center justify-between pt-2 border-t border-cream-100">
+        <div class="flex items-center gap-1" id="activeDaysIndicators">
           <!-- Mon-Sun dots inserted via JS -->
         </div>
+        <span id="statBestDay" class="text-[10px] font-medium text-coffee-500">Mon - Sun</span>
+      </div>
+
+      <!-- Collapsible Clean Daily Activity Bar Chart -->
+      <div id="chartContainer" class="hidden mt-3 pt-3 border-t border-cream-100 transition-all">
+        <div class="w-full h-32 relative">
+          <canvas id="dailyBarChart"></canvas>
+        </div>
+        <p class="text-[9px] text-center text-coffee-400 mt-1.5">Tap any bar to jump to that day's agenda</p>
       </div>
     </div>
 
-    <!-- DAILY ACTIVITY BAR CHART -->
-    <div class="bg-cream-50 border border-cream-300 rounded-3xl p-4 mb-3 shadow-xs">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-coffee-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-chart-simple text-coffee-700"></i>
-          Completed Tasks Each Day
-        </h3>
-        <span id="statBestDay" class="text-[10px] font-semibold text-coffee-600 bg-cream-200 px-2 py-0.5 rounded-full">Mon - Sun</span>
-      </div>
-      <div class="w-full h-36 relative">
-        <canvas id="dailyBarChart"></canvas>
-      </div>
-      <p class="text-[10px] text-center text-coffee-500 mt-2">💡 Tap any bar or day button above to view that specific day</p>
-    </div>
-
-    <!-- TIME-OF-DAY FILTER TABS -->
-    <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar pb-1 mb-2">
-      <button class="filter-tab active px-3 py-1.5 rounded-xl text-xs font-bold bg-coffee-800 text-cream-50 shadow-2xs touch-btn whitespace-nowrap" data-filter="all">
-        All Habits
+    <!-- TIME-OF-DAY FILTER TABS (CLEAN PILLS) -->
+    <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 mb-2">
+      <button class="filter-tab active px-3 py-1 rounded-xl text-[11px] font-bold bg-coffee-800 text-cream-50 shadow-2xs touch-btn whitespace-nowrap transition-colors" data-filter="all">
+        All
       </button>
-      <button class="filter-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-cream-50 text-coffee-700 border border-cream-300 hover:bg-cream-200 touch-btn whitespace-nowrap" data-filter="Morning">
+      <button class="filter-tab px-3 py-1 rounded-xl text-[11px] font-semibold bg-white text-coffee-600 border border-cream-200 hover:bg-cream-100 touch-btn whitespace-nowrap transition-colors" data-filter="Morning">
         ☀️ Morning
       </button>
-      <button class="filter-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-cream-50 text-coffee-700 border border-cream-300 hover:bg-cream-200 touch-btn whitespace-nowrap" data-filter="Afternoon">
+      <button class="filter-tab px-3 py-1 rounded-xl text-[11px] font-semibold bg-white text-coffee-600 border border-cream-200 hover:bg-cream-100 touch-btn whitespace-nowrap transition-colors" data-filter="Afternoon">
         🌤️ Afternoon
       </button>
-      <button class="filter-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-cream-50 text-coffee-700 border border-cream-300 hover:bg-cream-200 touch-btn whitespace-nowrap" data-filter="Evening">
+      <button class="filter-tab px-3 py-1 rounded-xl text-[11px] font-semibold bg-white text-coffee-600 border border-cream-200 hover:bg-cream-100 touch-btn whitespace-nowrap transition-colors" data-filter="Evening">
         🌙 Evening
       </button>
     </div>
 
     <!-- TASKS & HABITS CHECKLIST -->
-    <div class="space-y-3 mb-4">
-      <div id="goalsCardsList" class="space-y-3">
+    <div class="space-y-2.5 mb-3">
+      <div id="goalsCardsList" class="space-y-2.5">
         <!-- Rendered via JavaScript -->
       </div>
 
       <!-- Empty state if no habits -->
-      <div id="noGoalsState" class="hidden bg-cream-50 border-2 border-dashed border-cream-300 rounded-3xl p-8 text-center">
-        <div class="w-14 h-14 mx-auto mb-2.5 rounded-2xl bg-coffee-100 text-coffee-800 flex items-center justify-center text-xl">
+      <div id="noGoalsState" class="hidden bg-white border border-dashed border-cream-300 rounded-2xl p-6 text-center">
+        <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-cream-100 text-coffee-800 flex items-center justify-center text-lg">
           <i class="fa-solid fa-clipboard-check"></i>
         </div>
-        <h4 class="text-sm font-bold text-coffee-900">No Habits or Tasks in this view</h4>
-        <p class="text-xs text-coffee-600 mt-1 mb-4">Add your daily habits or weekly tasks to start checking them off!</p>
-        <button id="emptyAddGoalBtn" class="bg-coffee-800 hover:bg-coffee-900 text-cream-50 text-xs font-bold px-4 py-2.5 rounded-xl shadow-xs touch-btn">
-          + Add a Task
+        <h4 class="text-xs font-bold text-coffee-900">No Habits in this view</h4>
+        <p class="text-[11px] text-coffee-500 mt-0.5 mb-3">Add daily habits to start checking them off!</p>
+        <button id="emptyAddGoalBtn" class="bg-coffee-800 hover:bg-coffee-900 text-cream-50 text-xs font-bold px-3.5 py-2 rounded-xl shadow-xs touch-btn">
+          + Add a Habit
         </button>
       </div>
     </div>
 
-    <!-- WEEKLY INTENTION & REFLECTION CARD -->
-    <div class="bg-cream-50 border border-cream-300 rounded-2xl p-3.5 mb-2 shadow-2xs">
-      <div class="flex items-center justify-between mb-1.5">
-        <span class="text-[11px] font-extrabold uppercase tracking-wider text-coffee-700 flex items-center gap-1.5">
-          <i class="fa-solid fa-pen-fancy text-caramel-600"></i>
-          Weekly Intention & Notes
+    <!-- WEEKLY INTENTION & REFLECTION (MINIMALIST) -->
+    <div class="bg-white border border-cream-200/90 rounded-2xl p-3 mb-2 shadow-2xs">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-[10px] font-bold uppercase tracking-wider text-coffee-600 flex items-center gap-1.5">
+          <i class="fa-solid fa-pen-nib text-caramel-600 text-[10px]"></i>
+          Weekly Intention
         </span>
-        <span id="savedNoteBadge" class="text-[10px] text-coffee-500 font-medium">Auto-saved</span>
+        <span id="savedNoteBadge" class="text-[9px] text-coffee-400 font-medium">Auto-saved</span>
       </div>
-      <input type="text" id="weeklyNoteInput" placeholder="What is your single main focus this week?" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-white focus:outline-none focus:ring-2 focus:ring-coffee-700 text-coffee-900 font-medium placeholder:text-coffee-400">
+      <input type="text" id="weeklyNoteInput" placeholder="What is your focus this week?" class="w-full text-xs px-3 py-1.5 rounded-xl border border-cream-200 bg-cream-50 focus:bg-white focus:outline-none focus:ring-1 focus:ring-coffee-700 text-coffee-900 font-medium placeholder:text-coffee-400 transition-all">
     </div>
 
   </div>
 
-  <!-- FLOATING BOTTOM APP BAR -->
-  <div class="fixed bottom-0 left-0 right-0 z-40 bg-cream-50/95 backdrop-blur-md border-t border-cream-300 py-2.5 px-4">
-    <div class="max-w-lg mx-auto flex items-center gap-2.5">
+  <!-- FLOATING BOTTOM DYNAMIC ISLAND -->
+  <div class="fixed bottom-3 left-0 right-0 z-40 px-4 pointer-events-none">
+    <div class="max-w-md mx-auto bg-white/95 backdrop-blur-md border border-cream-300/80 rounded-2xl p-1.5 shadow-lg flex items-center justify-between gap-2 pointer-events-auto">
       <!-- Direct Day Focus Button -->
-      <button id="floatingDayViewBtn" class="bg-cream-200 border border-cream-300 hover:bg-cream-300 text-coffee-900 font-bold text-xs py-3 px-3.5 rounded-2xl shadow-xs flex items-center justify-center gap-1.5 transition-all transform active:scale-95 touch-btn whitespace-nowrap">
-        <i class="fa-solid fa-calendar-check text-caramel-600"></i>
+      <button id="floatingDayViewBtn" class="bg-cream-100 hover:bg-cream-200 text-coffee-900 font-bold text-xs py-2 px-3 rounded-xl transition-all flex items-center gap-1.5 touch-btn">
+        <i class="fa-solid fa-calendar-day text-caramel-600 text-xs"></i>
         <span>Day View</span>
       </button>
 
       <!-- Add New Habit Button -->
-      <button id="openAddGoalBtn" class="flex-1 bg-coffee-800 hover:bg-coffee-900 active:bg-coffee-950 text-cream-50 font-bold text-sm py-3 px-3 rounded-2xl shadow-md flex items-center justify-center gap-2 transition-all transform active:scale-95 touch-btn">
-        <i class="fa-solid fa-plus text-xs"></i>
+      <button id="openAddGoalBtn" class="flex-1 bg-coffee-800 hover:bg-coffee-900 active:scale-98 text-cream-50 font-bold text-xs py-2 px-3.5 rounded-xl shadow-xs flex items-center justify-center gap-1.5 transition-all touch-btn">
+        <i class="fa-solid fa-plus text-[11px]"></i>
         <span>Add Habit</span>
       </button>
 
       <!-- Celebrate Button -->
-      <button id="celebrateBtn" class="w-11 h-11 rounded-2xl bg-cream-200 border border-cream-300 text-coffee-800 flex items-center justify-center hover:bg-cream-300 active:scale-90 transition-all touch-btn shrink-0" title="Celebrate">
-        <i class="fa-solid fa-wand-magic-sparkles text-caramel-600"></i>
+      <button id="celebrateBtn" class="w-8 h-8 rounded-xl bg-cream-100 hover:bg-cream-200 text-coffee-800 flex items-center justify-center transition-all touch-btn shrink-0" title="Celebrate">
+        <i class="fa-solid fa-wand-magic-sparkles text-caramel-600 text-xs"></i>
       </button>
     </div>
   </div>
@@ -598,14 +588,19 @@
 
       <div class="p-4 sm:p-5 space-y-3 overflow-y-auto">
         <!-- Device Notifications Permission Button -->
-        <div class="p-3.5 bg-white rounded-2xl border border-cream-200 flex items-center justify-between">
-          <div>
+        <div class="p-3.5 bg-white rounded-2xl border border-cream-200 flex items-center justify-between gap-2">
+          <div class="min-w-0">
             <h4 class="text-xs font-bold text-coffee-800">Device 1-Hour Alerts</h4>
             <p class="text-[11px] text-coffee-600">Send phone notifications before events</p>
           </div>
-          <button id="modalNotifyBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-coffee-800 text-cream-50 touch-btn">
-            Enable
-          </button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="modalTestNotifyBtn" class="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-cream-100 hover:bg-cream-200 border border-cream-300 text-coffee-800 touch-btn" title="Send a test notification">
+              Test
+            </button>
+            <button id="modalNotifyBtn" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-coffee-800 text-cream-50 touch-btn">
+              Enable
+            </button>
+          </div>
         </div>
 
         <!-- Tick Sound Effect Toggle -->

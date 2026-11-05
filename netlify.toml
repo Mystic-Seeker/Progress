@@ -1,0 +1,8 @@
+[context.production.environment]
+  NETLIFY_DRAWER = "false"
+
+[context.deploy-preview.environment]
+  NETLIFY_DRAWER = "false"
+
+[build.processing]
+  skip_processing = true

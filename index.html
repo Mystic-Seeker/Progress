@@ -426,7 +426,6 @@
         <div class="bg-white rounded-2xl p-3.5 border border-cream-300 shadow-2xs">
           <div class="flex items-center justify-between mb-1.5">
             <div class="flex items-center gap-1.5">
-              <i class="fa-solid fa-bell text-caramel-600 text-xs"></i>
               <h4 class="text-xs font-black uppercase tracking-wider text-coffee-900">Specific Events & Reminders</h4>
             </div>
             <span class="text-[10px] font-bold text-coffee-500" id="dayEventsCount">0 events</span>
@@ -437,18 +436,18 @@
           <form id="addEventForm" class="space-y-2 mb-3 bg-cream-50 p-2.5 rounded-xl border border-cream-200">
             <input type="text" id="newEventInput" required placeholder="Event title (e.g. Doctor, Exam, Meeting)" class="w-full text-xs px-3 py-2 rounded-xl border border-cream-300 bg-white focus:outline-none focus:ring-2 focus:ring-coffee-700 text-coffee-900 font-medium">
             
-            <div class="flex items-center justify-between gap-2">
-              <div class="flex items-center gap-1.5 flex-1">
-                <span class="text-[11px] font-bold text-coffee-700 whitespace-nowrap">⏰ Time:</span>
-                <input type="time" id="newEventTimeInput" required value="16:00" class="text-xs font-bold px-2 py-1.5 rounded-lg border border-cream-300 bg-white text-coffee-900">
-              </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-bold text-coffee-700 whitespace-nowrap">Time:</span>
+              <input type="time" id="newEventTimeInput" required value="16:00" class="flex-1 min-w-0 text-xs font-bold px-2 py-1.5 rounded-lg border border-cream-300 bg-white text-coffee-900">
+            </div>
 
+            <div class="flex items-center justify-between gap-2">
               <label class="flex items-center gap-1.5 text-[11px] font-bold text-coffee-700 cursor-pointer whitespace-nowrap">
                 <input type="checkbox" id="newEventAlertCheckbox" checked class="accent-coffee-800 rounded">
                 <span>Alert 1h before</span>
               </label>
 
-              <button type="submit" class="bg-coffee-800 hover:bg-coffee-900 text-cream-50 text-xs font-bold px-3 py-1.5 rounded-lg shadow-2xs touch-btn whitespace-nowrap">
+              <button type="submit" class="bg-coffee-800 hover:bg-coffee-900 text-cream-50 text-xs font-bold px-5 py-2 rounded-lg shadow-2xs touch-btn whitespace-nowrap">
                 + Add
               </button>
             </div>
@@ -629,6 +628,14 @@
         </div>
 
         <div class="p-3.5 bg-white rounded-2xl border border-cream-200">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-coffee-800 mb-1">App Version & Updates</h4>
+          <p class="text-xs text-coffee-600 mb-2">Progress v8 (Clean & Minimal Edition)</p>
+          <button id="forceUpdateAppBtn" class="w-full bg-coffee-800 hover:bg-coffee-900 text-cream-50 text-xs font-bold py-2.5 px-3 rounded-xl transition-colors flex items-center justify-center gap-2 touch-btn">
+            <i class="fa-solid fa-arrows-rotate"></i> Force Reload & Clear Cache
+          </button>
+        </div>
+
+        <div class="p-3.5 bg-white rounded-2xl border border-cream-200">
           <h4 class="text-xs font-bold uppercase tracking-wider text-coffee-800 mb-1">Reset Options</h4>
           <p class="text-xs text-coffee-600 mb-2.5">Reload sample tasks or wipe clean.</p>
           <div class="flex gap-2">
@@ -661,7 +668,7 @@
       } catch (err) {}
     };
   </script>
-  <script src="app.js?v=20261106_v8"></script>
+  <script src="app.js?v=20261110_v9"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {

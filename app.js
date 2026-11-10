@@ -398,6 +398,66 @@
     }
   }
 
+  // --- Background reminder support (shared IndexedDB so the service worker can read events) ---
+  function openReminderDB() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open('progress-reminders', 1);
+      req.onupgradeneeded = () => req.result.createObjectStore('kv');
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  function idbGet(key) {
+    return openReminderDB().then(db => new Promise((resolve) => {
+      const r = db.transaction('kv').objectStore('kv').get(key);
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => resolve(undefined);
+    })).catch(() => undefined);
+  }
+
+  function idbSet(key, value) {
+    return openReminderDB().then(db => new Promise((resolve) => {
+      const tx = db.transaction('kv', 'readwrite');
+      tx.objectStore('kv').put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    })).catch(() => false);
+  }
+
+  // Copy events to the shared store and ask the browser to wake the service worker periodically
+  function syncRemindersToWorker() {
+    if (!('indexedDB' in window)) return;
+    idbSet('events', JSON.parse(JSON.stringify(trackerData.dayEvents || {})));
+    idbSet('settings', { soundEnabled: trackerData.soundEnabled });
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(async (reg) => {
+        try {
+          if (reg.periodicSync) {
+            await reg.periodicSync.register('check-reminders', { minInterval: 15 * 60 * 1000 });
+          }
+        } catch (e) {}
+        if (reg.active) reg.active.postMessage({ type: 'check-reminders' });
+      }).catch(() => {});
+    }
+  }
+
+  // Mark events the service worker already notified about so they are not repeated
+  async function applyWorkerNotifiedFlags() {
+    const ids = await idbGet('notified');
+    if (!Array.isArray(ids) || ids.length === 0) return;
+    let changed = false;
+    Object.values(trackerData.dayEvents || {}).forEach(list => {
+      list.forEach(evt => {
+        if (ids.includes(evt.id) && !evt.notified) {
+          evt.notified = true;
+          changed = true;
+        }
+      });
+    });
+    if (changed) saveData();
+  }
+
   // --- 1-Hour Reminder Checker Loop ---
   function checkUpcomingEventReminders() {
     const today = new Date();
@@ -638,6 +698,7 @@
     } catch (e) {
       console.error('Failed to save to localStorage', e);
     }
+    if (typeof syncRemindersToWorker === 'function') syncRemindersToWorker();
   }
 
   function getCurrentWeekLogs() {
@@ -892,10 +953,9 @@
                   ${evt.title}
                 </span>
                 <div class="flex items-center gap-2 mt-0.5">
-                  <span class="text-[10px] font-extrabold text-caramel-600 flex items-center gap-1">
-                    <i class="fa-regular fa-clock text-[9px]"></i> ${formatTimeDisplay(evt.time)}
+                  <span class="text-[10px] font-extrabold text-caramel-600">
+                    ${formatTimeDisplay(evt.time)}
                   </span>
-                  ${evt.alertOneHour !== false ? '<span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-semibold">1h alert</span>' : ''}
                 </div>
               </div>
             </button>
@@ -1807,6 +1867,27 @@
       }
     });
 
+    // Force Reload & Clear Cache
+    const forceBtn = document.getElementById('forceUpdateAppBtn');
+    if (forceBtn) {
+      forceBtn.addEventListener('click', () => {
+        if ('caches' in window) {
+          caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))).then(() => {
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.getRegistrations().then(regs => {
+                regs.forEach(r => r.unregister());
+                window.location.reload(true);
+              });
+            } else {
+              window.location.reload(true);
+            }
+          });
+        } else {
+          window.location.reload(true);
+        }
+      });
+    }
+
     // Export Data JSON
     document.getElementById('exportDataBtn').addEventListener('click', () => {
       const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(trackerData, null, 2));
@@ -1859,6 +1940,17 @@
   loadData();
   updateQuote();
   initEventListeners();
+  applyWorkerNotifiedFlags().then(() => {
+    syncRemindersToWorker();
+    renderAll();
+  });
   renderAll();
+
+  // Re-check reminders the moment the app returns to the foreground
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      applyWorkerNotifiedFlags().then(checkUpcomingEventReminders);
+    }
+  });
 
 })();
